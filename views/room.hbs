@@ -4,11 +4,11 @@
 </head>
 <div class="grid wide">
     <div class="row">
-        <div class="col l-6">
+        <div class="col l-5">
             <div class="grid-caro">
             </div>
         </div>
-        <div class="col l-2" style="align-items: center; display: flex; justify-content: space-evenly;">
+        <div class="col l-3">
             <div class="ready">
                 <a class="btn btn1" id="ready-btn">Sẵn sàng</a>
 
@@ -45,7 +45,6 @@
         </div>
     </div>
 </div>
-
 <script>
     // game caro
     let xx = 'x';
@@ -81,8 +80,7 @@
                 count++;
             }
             if (count >= 5) {
-                console.log(`${value} win`)
-                return value;
+                return true;
             } else {
                 count = 0;
             }
@@ -101,7 +99,7 @@
             }
             if (count >= 5) {
                 console.log(`${value} win`)
-                return value;
+                return true;
             } else {
                 count = 0;
             }
@@ -127,7 +125,7 @@
             if (count == 5) {
                 console.log(`${value} win`)
                 count = 0;
-                return value;
+                return true;
 
             }
             ii++;
@@ -153,12 +151,13 @@
             if (count == 5) {
                 count = 0;
                 console.log(`${value} win`)
-                return value;
+                return true;
             }
             iii++;
             jjj--;
             count = 0;
         }
+        return null;
     }
 
     function clicked(i, j) {
@@ -242,7 +241,8 @@
                                 i, 
                                 j, 
                                 flag: MY_FLAG, //hmm có cái owner thì k cần cài này nhưng mà kệ
-                                owner : socket.id   // de xem ai vưa đánh
+                                owner : socket.id, // de xem ai vưa đánh
+                                name: playerName  
                             });
                         } 
 
@@ -262,24 +262,31 @@
         if(data.owner == socket.id){
             MY_TURN = false;  //xác nhận server đã nhận data và response lại thì mới đổi turn
         } else {
-            MY_TURN = true
+            MY_TURN = true;
         }
         let buttonCaro = document.querySelector(`#caro-btn-${i}-${j}`);
+        console.log(data)
         if (data.flag == 'X') {
             buttonCaro.style.backgroundImage = 'url("/img/X-chess-color.png")';
             row[i][j] = 'X';
-            findPlayerWin(i, j);
-            return; 
+        } else {
+            buttonCaro.style.backgroundImage = 'url("/img/O-chess-color.png")';
+            row[i][j] = 'O';
         }
-        buttonCaro.style.backgroundImage = 'url("/img/O-chess-color.png")';
-        row[i][j] = 'O';
-        findPlayerWin(i, j);
+        let name = data.name;
+        if(findPlayerWin(i, j)){
+            alert(`${name} chiến thắng !!!`)
+        }
 
     })
 
     socket.on("set-flag", data => {
         MY_FLAG = data.flag;
         MY_TURN = data.flag == "O" ? true : false  //O danh trc
+        console.log('My turn: ' + MY_TURN)
+        console.log('My flag: ' + MY_FLAG)
+        console.log(socket.id)
+        console.log(playerName)
     })
 
     window.onload = caroSocket;
