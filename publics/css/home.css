@@ -1,0 +1,126 @@
+.room {
+  margin: 10px 0;
+  background-color: var(--orange-color);
+  height: 80px;
+  display: flex;
+  align-content: center;
+  justify-content: space-evenly;
+  align-items: center;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgb(0 20 20);
+  font-size: 18px;
+  color: #333;
+  text-decoration: none;
+}
+.room:hover {
+  background-color: #03a9f4;
+  color: #fff;
+  cursor: pointer;
+}
+.user__image {
+  display: flex;
+  justify-content: space-evenly;
+}
+.user__image-status {
+  height: 16px;
+  border-radius: 50%;
+}
+/* overlay */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 68;
+  animation: fadeIn 0.1s linear;
+  display: none;
+}
+
+.overlay:active .popup {
+  border: 1px solid #000;
+}
+
+@keyframes show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.popup {
+  z-index: 69;
+  width: 300px;
+  position: fixed;
+  top: 25%;
+  right: 50%;
+  transform: translateX(50%);
+  background-color: white;
+  border-radius: 5px;
+  animation: show 0.3s linear;
+  display: none;
+}
+
+.popup__tile {
+  text-align: center;
+  font-size: 1.7rem;
+}
+
+.popup__description {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.pop__up-button {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.pop__up-button-exit {
+  background-color: #fff;
+  color: #106fff;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  margin: auto 10px;
+}
+
+.pop__up-button-exit:hover {
+  font-weight: 600;
+}
+
+.pop__up-button-ok {
+  background-color: #ffb18e;
+  justify-content: center;
+  border: none;
+  border-radius: 3px;
+  width: 100px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  color: var(--black-color);
+  text-decoration: none;
+  font-size: 1.7rem;
+  transition: all linear 0.1s;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.pop__up-button-ok:hover {
+  background-color: var(--red-color);
+  color: #ffffee;
+  cursor: pointer;
+}
+
+@keyframes show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

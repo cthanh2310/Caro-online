@@ -1,0 +1,26 @@
+<header class="header">
+    <div class="flex">
+        <div class="title">
+            <h1>Game caro</h1>
+        </div>
+        <div class="search">
+            <div class="search__btn">
+                <input type="text" class="search__btn--input" placeholder="Nhập id phòng ...">
+                <button class="search__btn--btn">Tìm phòng</button>
+            </div>
+            <div class="create__btn">
+                <button class="create__btn--btn" onclick="createRoom()">Tạo phòng</button>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    function randomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+    function createRoom() {
+        let id = randomNumber(20, 1000); //Trả về một số ngẫu nhiên từ 1 đến 9
+        console.log(id)
+        window.location.href = `/room/${id}`
+    }
+</script>

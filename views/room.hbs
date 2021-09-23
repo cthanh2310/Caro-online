@@ -1,0 +1,286 @@
+<head>
+    <link rel="stylesheet" href="/css/room.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<div class="grid wide">
+    <div class="row">
+        <div class="col l-6">
+            <div class="grid-caro">
+            </div>
+        </div>
+        <div class="col l-2" style="align-items: center; display: flex; justify-content: space-evenly;">
+            <div class="ready">
+                <a class="btn btn1" id="ready-btn">Sẵn sàng</a>
+
+            </div>
+        </div>
+        <div class="col l-4">
+            <div class="chat">
+                <section class="msger">
+                    <header class="msger-header">
+                        <div class="msger-header-title">
+                            <i class="fas fa-comment-alt"></i> Chat
+                        </div>
+                        <div class="msger-header-options">
+                            <span><i class="fas fa-cog"></i></span>
+                        </div>
+                    </header>
+
+                    <main class="msger-chat">
+                        {{!-- <div class="msg">
+                            <div class="msg-img"
+                                style="background-image: url(https://image.flaticon.com/icons/svg/145/145867.svg)">
+                            </div>
+                            <span id="player-name"></span>
+                        </div> --}}
+                    </main>
+
+                    <form class="msger-inputarea">
+                        <input type="text" class="msger-input" placeholder="Enter your message...">
+                        <button id="send-btn" type="submit" class="msger-send-btn">Send</button>
+                    </form>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // game caro
+    let xx = 'x';
+    let oo = 'o';
+    let x = 23, y = 24;
+    let xflag = false;
+    let row = new Array(x);
+    let caroTable = document.querySelector('.grid-caro');
+    function khoitao() {
+        for (let i = 0; i < x; i++) {
+            row[i] = new Array(y);
+            for (let j = 0; j < y; j++) {
+                let buttonCaro = document.createElement('button');
+                buttonCaro.className = 'caro-btn';
+                buttonCaro.id = `caro-btn-${i}-${j}`;
+                caroTable.append(buttonCaro)
+            }
+        }
+    }
+
+    function findPlayerWin(i, j) {
+        let count = 0, value = row[i][j];
+        // check ngang
+        let run1 = j - 4 > 0 ? j - 4 : 0;  // neu run1 bị ra khỏi ma trận thì gán = 0
+        for (run1; run1 <= j; run1++) {
+            let temp = run1;
+            while (row[i][temp] == value && count <= 5) {
+                if (temp == x - 1 || temp == y - 1) {
+                    count++;
+                    break;
+                }
+                temp++;
+                count++;
+            }
+            if (count >= 5) {
+                console.log(`${value} win`)
+                return value;
+            } else {
+                count = 0;
+            }
+        }
+        // check doc
+        let run2 = i - 4 > 0 ? i - 4 : 0;
+        for (run2; run2 <= i; run2++) {
+            let temp = run2;
+            while (row[temp][j] == value && count <= 5) {
+                if (temp == x - 1 || temp == y - 1) {
+                    count++;
+                    break;
+                }
+                temp++;
+                count++;
+            }
+            if (count >= 5) {
+                console.log(`${value} win`)
+                return value;
+            } else {
+                count = 0;
+            }
+        }
+
+
+        // check cheo \
+        let ii = i - 4;
+        let jj = j - 4;
+        while (ii <= i && jj <= j) {
+            let tempI = ii, tempJ = jj;
+            if (tempI >= 0 && tempJ >= 0) {
+                while (row[tempI][tempJ] == value && count < 5) {
+                    if (tempI == x - 1 || tempJ == y - 1) {
+                        count++;
+                        break;
+                    }
+                    tempI++;
+                    tempJ++;
+                    count++;
+                }
+            }
+            if (count == 5) {
+                console.log(`${value} win`)
+                count = 0;
+                return value;
+
+            }
+            ii++;
+            jj++;
+            count = 0;
+        }
+        // check cheo /
+        let iii = i - 4;
+        let jjj = j + 4;
+        while (iii <= i && jjj >= j) {
+            let tempI = iii, tempJ = jjj;
+            if (tempI >= 0 && tempJ <= y) {
+                while (row[tempI][tempJ] == value && count < 5) {
+                    if (tempI == x - 1 || tempJ == 0) {
+                        count++;
+                        break;
+                    };
+                    tempI++;
+                    tempJ--;
+                    count++;
+                }
+            }
+            if (count == 5) {
+                count = 0;
+                console.log(`${value} win`)
+                return value;
+            }
+            iii++;
+            jjj--;
+            count = 0;
+        }
+    }
+
+    function clicked(i, j) {
+        if (row[i][j] == xx || row[i][j] == oo) {
+            return true;
+        }
+        return false;
+    }
+    khoitao();
+
+
+
+
+    // chat
+    var playerName;
+    var chatBox = document.querySelector('.msger-chat');
+    (function myFunction() {
+        playerName = prompt("Điền tên của bạn!", "");
+        if (playerName != '') {
+        } else {
+            myFunction()
+        }
+    })()
+    document.querySelector('#send-btn').onclick = function (e) {
+        e.preventDefault();
+        let textContent = document.querySelector('.msger-input').value;
+        chatBox.innerHTML += `<b>${playerName}</b>` + ': ' + textContent + '<br />';
+        chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
+    }
+</script>
+<script>
+
+    let MY_FLAG;  //undefined
+    let MY_TURN = false;  //ban dau false
+
+    // socket
+    let readyBtn = document.querySelector('#ready-btn');
+    let checkReady = false;
+    function changeUI() {
+        readyBtn.classList.toggle('cancel')
+        if (!checkReady) {
+            readyBtn.innerHTML = 'Hủy';
+            checkReady = true;
+        } else {
+            readyBtn.innerHTML = 'Sẵn sàng';
+            checkReady = false;
+        }
+    }
+
+    var socket = io.connect();
+    function caroSocket() {
+        const start = Date.now();
+        let userId = playerName + start;
+        let roomId = window.location.href.split('/')[4];
+        socket.emit('connection', { roomId, userId });
+        readyBtn.onclick = function () {
+            event.preventDefault();
+            changeUI();
+            if (checkReady) {
+                socket.emit('client-status', { status: 'ready', roomId, userId });
+
+            } else {
+                socket.emit('client-status', { status: 'unready', roomId, userId });
+
+            }
+        }
+    }
+    function allowClick() {
+        for (let i = 0; i < x; i++) {
+
+            row[i] = new Array(y);
+            for (let j = 0; j < y; j++) {
+
+                let buttonCaro = document.querySelector(`#caro-btn-${i}-${j}`);
+                buttonCaro.onclick = function () {
+                    if (!clicked(i, j)) {  //if box is empty
+
+                        if (MY_TURN) {   
+                            //send to server
+                            socket.emit('click', { 
+                                i, 
+                                j, 
+                                flag: MY_FLAG, //hmm có cái owner thì k cần cài này nhưng mà kệ
+                                owner : socket.id   // de xem ai vưa đánh
+                            });
+                        } 
+
+                    }
+                }
+
+            }
+
+        }
+    }
+    socket.on('start-game', function () {
+        allowClick();
+    })
+    socket.on('click', function (data) {
+        let i = data.i;
+        let j = data.j;
+        if(data.owner == socket.id){
+            MY_TURN = false;  //xác nhận server đã nhận data và response lại thì mới đổi turn
+        } else {
+            MY_TURN = true
+        }
+        let buttonCaro = document.querySelector(`#caro-btn-${i}-${j}`);
+        if (data.flag == 'X') {
+            buttonCaro.style.backgroundImage = 'url("/img/X-chess-color.png")';
+            row[i][j] = 'X';
+            findPlayerWin(i, j);
+            return; 
+        }
+        buttonCaro.style.backgroundImage = 'url("/img/O-chess-color.png")';
+        row[i][j] = 'O';
+        findPlayerWin(i, j);
+
+    })
+
+    socket.on("set-flag", data => {
+        MY_FLAG = data.flag;
+        MY_TURN = data.flag == "O" ? true : false  //O danh trc
+    })
+
+    window.onload = caroSocket;
+</script>
