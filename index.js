@@ -1,3 +1,11 @@
+console.log(process.env.NODE_ENV)
+if (process.env.NODE_ENV != 'production') {
+    // neu dev thi import cai dotenv de dung env tu .env ; neu da len production thi dung env trong config vars
+    require('dotenv').config({ path: './configs/.env' })
+    console.log('ok in local env')
+} else {
+    console.log('ok in production env')
+}
 const express = require('express')
 const app = express()
 app.use(express.static('publics'))
@@ -32,7 +40,6 @@ io.on('connection', (socket) => {
         console.log('clients' + clients)
         console.log(socket.adapter.rooms1)
         if (numClients == 2) {
-
             let i = 0
             for (const client of clients) {
                 // clients la set
@@ -70,6 +77,6 @@ app.get('/room/:id', function (req, res) {
     res.render('room', { layout: 'room' })
 })
 
-server.listen(3000, () => {
+server.listen(process.env.PORT, () => {
     console.log('listening on port 3000')
 })
