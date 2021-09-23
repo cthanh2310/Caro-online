@@ -34,11 +34,7 @@ io.on('connection', (socket) => {
         console.log(socket.adapter.rooms1)
         if (numClients == 2) {
             const bRand = Math.floor(Math.random() * 2)   // 1 or 0
-            // console.log(bRand)
-            // const flags = {
-            //     player1 : bRand == 0 ? "X" : "O",
-            //     player2 : bRand == 0 ? "O" : "X"
-            // }
+            
             let i = 0;
             for (const client of clients) { // clients la set =)))
                 console.log(client)
@@ -80,6 +76,6 @@ app.get('/room/:id', function (req, res) {
     res.render('room', { layout: 'room' });
 })
 
-server.listen(3000, () => {
-    console.log('listening on port 3000');
+server.listen(8080, () => {
+    console.log('listening on port 8080');
 })
