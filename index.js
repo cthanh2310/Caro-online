@@ -12,33 +12,40 @@ app.use(express.static('publics'))
 
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
-function removeObject(arr, userId) {
-    for (let i = 0; i < arr.length; i++) {
-        if (arr[i].userId == userId) {
-            arr.splice(i, 1)
-            break
-        }
-    }
-}
+
 io.on('connection', (socket) => {
     console.log('Co nguoi truy cap', socket.id)
     socket.on('connection', (data) => {
-        console.log('connection: ' + socket.id + ' join ' + data.roomId)
+        console.log('connection: ' + socket.id + ' join ' + data.url)
+        socket.join(data.url) // When user connect --> push user to room
+        const userJoinURL = io.sockets.adapter.rooms.get(data.url)
+        const numUserJoinURL = userJoinURL ? userJoinURL.size : 0
+        socket.emit('connection', {numUserJoinURL})
     })
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (data) => {
+        console.log(data)
         console.log('user: ' + socket.id + ' disconnected')
     })
     socket.on('client-status', (data) => {
         if (data.status == 'ready') {
             socket.join(data.roomId) // When user connect --> push user to room
+            io.sockets.emit('client-status', {
+                name: data.playerName,
+                status: 'ready',
+                id: socket.id,
+            })
         }
         if (data.status == 'unready') {
-            socket.leave(data.roomId)
+            socket.leave(data.roomId) // When user connect --> push user to room
+            io.sockets.emit('client-status', {
+                name: data.playerName,
+                status: 'unready',
+                id: socket.id,
+            })
         }
         const clients = io.sockets.adapter.rooms.get(data.roomId)
         const numClients = clients ? clients.size : 0
         console.log('clients' + clients)
-        console.log(socket.adapter.rooms1)
         if (numClients == 2) {
             let i = 0
             for (const client of clients) {
@@ -76,7 +83,6 @@ app.get('/', function (req, res) {
 app.get('/room/:id', function (req, res) {
     res.render('room', { layout: 'room' })
 })
-
 server.listen(process.env.PORT, () => {
     console.log('listening on port 3000')
 })

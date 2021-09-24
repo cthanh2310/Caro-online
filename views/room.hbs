@@ -10,6 +10,19 @@
         </div>
         <div class="col l-3">
             <div class="ready">
+                <div class="score"> 
+                    <h1 class="score-title">Tỉ số</h1>
+                    <div class="list-player">
+                    </div>
+                    <div class="score-number">
+                        <span id="score-one"></span>
+                        <span id="score-two"></span>
+                    </div>
+
+                </div> 
+
+
+
                 <a class="btn btn1" id="ready-btn">Sẵn sàng</a>
 
             </div>
@@ -66,7 +79,7 @@
     }
 
     function findPlayerWin(i, j) {
-        let count = 0, value = row[i][j];
+        let count = 0, value = row[i][j]; 
         // check ngang
         let run1 = j - 4 > 0 ? j - 4 : 0;  // neu run1 bị ra khỏi ma trận thì gán = 0
         for (run1; run1 <= j; run1++) {
@@ -209,19 +222,29 @@
 
     var socket = io.connect();
     function caroSocket() {
-        const start = Date.now();
-        let userId = playerName + start;
         let roomId = window.location.href.split('/')[4];
-        socket.emit('connection', { roomId, userId });
+        let url = window.location.href;
+        socket.emit('connection', { roomId, url });
         readyBtn.onclick = function () {
             event.preventDefault();
             changeUI();
             if (checkReady) {
-                socket.emit('client-status', { status: 'ready', roomId, userId });
+                socket.emit('client-status', { status: 'ready', roomId, playerName });
 
             } else {
-                socket.emit('client-status', { status: 'unready', roomId, userId });
+                socket.emit('client-status', { status: 'unready', roomId, playerName });
 
+            }
+        }
+    }
+    
+    function reset(){
+        for(let i = 0; i < x; i++){
+            row[i] = new Array(y);
+            for( let j = 0; j < y; j++){
+                let buttonCaro = document.querySelector(`#caro-btn-${i}-${j}`);
+                buttonCaro.style.backgroundImage = 'none';
+                row[i][j] = null;
             }
         }
     }
@@ -253,6 +276,19 @@
 
         }
     }
+    socket.on('connection', (data) => {
+        console.log(data.numUserJoinURL);
+        if(data.numUserJoinURL > 2){
+            let content = confirm("Phòng đã đủ người"); // The "hello" means to show the following text
+            if (content === true) {
+                window.location.href = '/'
+            } else {
+                window.location.href = '/'
+            }
+        }
+    })
+
+
     socket.on('start-game', function () {
         allowClick();
     })
@@ -275,18 +311,28 @@
         }
         let name = data.name;
         if(findPlayerWin(i, j)){
-            alert(`${name} chiến thắng !!!`)
+            alert(`${name} chiến thắng !!!`);
+            reset();
         }
 
     })
-
+    socket.on("client-status", data => {
+        let listPlayer = document.querySelector('.list-player');
+        let listPlayerNum = listPlayer.getElementsByTagName('*').length;
+        if(data.status == 'ready' && listPlayerNum <= 2){
+            let nameSpan = document.createElement("span");
+            nameSpan.textContent = data.name;    
+            nameSpan.id = data.id;  
+            listPlayer.append(nameSpan);
+        }
+         if(data.status == 'unready'){
+            let nameSpan = document.querySelector(`#${data.id}`);
+            listPlayer.removeChild(nameSpan);
+        }
+    })
     socket.on("set-flag", data => {
         MY_FLAG = data.flag;
         MY_TURN = data.flag == "O" ? true : false  //O danh trc
-        console.log('My turn: ' + MY_TURN)
-        console.log('My flag: ' + MY_FLAG)
-        console.log(socket.id)
-        console.log(playerName)
     })
 
     window.onload = caroSocket;

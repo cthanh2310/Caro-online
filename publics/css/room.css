@@ -32,23 +32,44 @@
 
 /* BTN ready */
 .ready {
+    flex-direction: column;
     display: flex;
     align-items: center;
     height: 100%;
     justify-content: center;
-  }
+}
+.score {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+.list-player {
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+.score-number {
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 1.6rem;
+    color: rgb(248, 17, 0);
+    margin-bottom: 8px;
+}
 .btn {
     cursor: pointer;
     text-align: center;
     position: relative;
     display: block;
-    color: white;
-    font-size: 14px;
+    color: #2c2f33;
+    font-size: 2rem;
     font-family: 'montserrat';
     text-decoration: none;
     border: 2px solid #00b432;
     padding: 5px 0px;
-    width: 83px;
+    width: 100px;
     overflow: hidden;
     border-radius: 3px;
     transition: 1s all ease;
