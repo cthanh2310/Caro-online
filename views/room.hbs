@@ -218,7 +218,7 @@
         localStorage.setItem(`listUser${roomId}`, JSON.stringify(listUser));
         socket.emit('reset-name', {listUser: listUser})
     })
-    socket.on('reset-name', (data) => {
+    socket.on('reset-name', (data) => { 
         console.log('ookoko')
         console.log(data)
         let listPlayer = document.querySelector('.list-player');
