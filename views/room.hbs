@@ -1,56 +1,72 @@
 <head>
-    <link rel="stylesheet" href="/css/room.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/css/room.css' />
+    <script src='/socket.io/socket.io.js'></script>
+    <script>
+        var url = window.location.href;
+        var socket = io.connect();
+        var roomId = window.location.href.split('/')[4];
+        var listUser = JSON.parse(localStorage.getItem(`listUser${roomId}`)) != null
+                    ? JSON.parse(localStorage.getItem(`listUser${roomId}`))
+                    : [];
+        socket.emit('connection', { roomId, url });
+    </script>
 </head>
-<div class="grid wide">
-    <div class="row">
-        <div class="col l-5">
-            <div class="grid-caro">
+<div class='grid wide'>
+    <div class='row'>
+        <div class='col l-5'>
+            <div class='grid-caro'>
             </div>
         </div>
-        <div class="col l-3">
-            <div class="ready">
-                <div class="score"> 
-                    <h1 class="score-title">Tỉ số</h1>
-                    <div class="list-player">
+        <div class='col l-3'>
+            <div class='ready'>
+                <div class='score'>
+                    <h1 class='score-title'>Tỉ số</h1>
+                    <div class='list-player'>
                     </div>
-                    <div class="score-number">
-                        <span id="score-one"></span>
-                        <span id="score-two"></span>
+                    <div class='score-number'>
+                        <span id='score-one'>0</span>
+                        <span id='score-two'>0</span>
                     </div>
 
-                </div> 
+                </div>
 
-
-
-                <a class="btn btn1" id="ready-btn">Sẵn sàng</a>
+                <a class='btn btn1' id='ready-btn'>Sẵn sàng</a>
 
             </div>
         </div>
-        <div class="col l-4">
-            <div class="chat">
-                <section class="msger">
-                    <header class="msger-header">
-                        <div class="msger-header-title">
-                            <i class="fas fa-comment-alt"></i> Chat
+        <div class='col l-4'>
+            <div class='chat'>
+                <section class='msger'>
+                    <header class='msger-header'>
+                        <div class='msger-header-title'>
+                            <i class='fas fa-comment-alt'></i>
+                            Chat
                         </div>
-                        <div class="msger-header-options">
-                            <span><i class="fas fa-cog"></i></span>
+                        <div class='msger-header-options'>
+                            <span><i class='fas fa-cog'></i></span>
                         </div>
                     </header>
 
-                    <main class="msger-chat">
-                        {{!-- <div class="msg">
+                    <main class='msger-chat'>
+                        {{! <div class="msg">
                             <div class="msg-img"
                                 style="background-image: url(https://image.flaticon.com/icons/svg/145/145867.svg)">
                             </div>
                             <span id="player-name"></span>
-                        </div> --}}
+                        </div> }}
                     </main>
 
-                    <form class="msger-inputarea">
-                        <input type="text" class="msger-input" placeholder="Enter your message...">
-                        <button id="send-btn" type="submit" class="msger-send-btn">Send</button>
+                    <form class='msger-inputarea'>
+                        <input
+                            type='text'
+                            class='msger-input'
+                            placeholder='Enter your message...'
+                        />
+                        <button
+                            id='send-btn'
+                            type='submit'
+                            class='msger-send-btn'
+                        >Send</button>
                     </form>
                 </section>
 
@@ -190,16 +206,39 @@
     (function myFunction() {
         playerName = prompt("Điền tên của bạn!", "");
         if (playerName != '') {
+            socket.emit('show-name', {playerName, url})
         } else {
             myFunction()
         }
     })()
+    socket.on('show-name', function (data){
+        console.log(data)
+        console.log(listUser)
+        listUser.push(data.playerName)
+        localStorage.setItem(`listUser${roomId}`, JSON.stringify(listUser));
+        socket.emit('reset-name', {listUser: listUser})
+    })
+    socket.on('reset-name', (data) => {
+        console.log('ookoko')
+        console.log(data)
+        let listPlayer = document.querySelector('.list-player');
+        for(let name of data.listUser){
+            let nameSpan = document.createElement("span");
+            nameSpan.textContent = name;  
+            listPlayer.append(nameSpan);
+        } 
+
+    })
     document.querySelector('#send-btn').onclick = function (e) {
         e.preventDefault();
         let textContent = document.querySelector('.msger-input').value;
+        socket.emit('send-message', {textContent, playerName, url})
+    }
+    socket.on('send-message', function (data) {
+        let {playerName, textContent} = data;
         chatBox.innerHTML += `<b>${playerName}</b>` + ': ' + textContent + '<br />';
         chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
-    }
+    })
 </script>
 <script>
 
@@ -220,11 +259,7 @@
         }
     }
 
-    var socket = io.connect();
     function caroSocket() {
-        let roomId = window.location.href.split('/')[4];
-        let url = window.location.href;
-        socket.emit('connection', { roomId, url });
         readyBtn.onclick = function () {
             event.preventDefault();
             changeUI();
@@ -336,4 +371,9 @@
     })
 
     window.onload = caroSocket;
+    window.onbeforeunload = function() {
+        listUser.pop();
+        localStorage.setItem(`listUser${roomId}`, JSON.stringify(listUser));
+        console.log('event');
+    }
 </script>

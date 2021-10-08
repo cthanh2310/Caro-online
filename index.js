@@ -20,7 +20,7 @@ io.on('connection', (socket) => {
         socket.join(data.url) // When user connect --> push user to room
         const userJoinURL = io.sockets.adapter.rooms.get(data.url)
         const numUserJoinURL = userJoinURL ? userJoinURL.size : 0
-        socket.emit('connection', {numUserJoinURL})
+        socket.emit('connection', { numUserJoinURL })
     })
     socket.on('disconnect', (data) => {
         console.log(data)
@@ -64,6 +64,18 @@ io.on('connection', (socket) => {
         console.log(data)
         io.sockets.emit('click', data)
     })
+    // chat
+    socket.on('send-message', (data) => {
+        io.sockets.in(data.url).emit('send-message', data)
+    })
+    socket.on('show-name', (data)=>{
+        console.log(data)
+        io.sockets.in(data.url).emit('show-name', data)
+    })
+    socket.on('reset-name', (data)=>{
+        console.log(data)
+        io.sockets.in(data.url).emit('reset-name', data)
+    })
 })
 
 const handlebars = require('express-handlebars')
@@ -78,7 +90,11 @@ app.set('view engine', 'hbs')
 app.set('views', './views')
 
 app.get('/', function (req, res) {
-    res.render('home')
+    let listRoom = []
+    for (let i = 1; i <= 50; i++) {
+        listRoom[i] = i
+    }
+    res.render('home', {listRoom})
 })
 app.get('/room/:id', function (req, res) {
     res.render('room', { layout: 'room' })
