@@ -68,6 +68,7 @@ io.on('connection', (socket) => {
     socket.on('send-message', (data) => {
         io.sockets.in(data.url).emit('send-message', data)
     })
+    
     socket.on('show-name', (data)=>{
         console.log(data)
         io.sockets.in(data.url).emit('show-name', data)
